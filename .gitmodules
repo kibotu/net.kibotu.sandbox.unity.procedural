@@ -1,3 +1,6 @@
 [submodule "Assets/RogueLike"]
 	path = Assets/RogueLike
 	url = ../RogueLike.git
+[submodule "Assets/Voronoi"]
+	path = Assets/Voronoi
+	url = ../net.kibotu.sandbox.unity.Voronoi.git
