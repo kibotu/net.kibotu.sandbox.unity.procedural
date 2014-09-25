@@ -7,7 +7,7 @@ namespace Voronoi
 {
     public abstract class Surface
     {
-        protected List<Point> points;
+        protected List<Point> points = new List<Point>();
 
         public void AddPoints(Point[] points)
         {
