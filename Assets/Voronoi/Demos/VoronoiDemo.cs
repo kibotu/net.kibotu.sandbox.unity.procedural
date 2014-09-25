@@ -9,6 +9,7 @@ using Cell = Voronoi.Cell;
 public class VoronoiDemo : MonoBehaviour
 {
     public int numSites = 36;
+    public bool animate = false;
     public Bounds bounds;
 
     private List<Point> sites;
@@ -20,8 +21,7 @@ public class VoronoiDemo : MonoBehaviour
         sites = new List<Point>();
         voronoi = new FortuneVoronoi();
 
-        CreateSites(true, true, 50);
-//        RelaxSites(50);
+        CreateSites(true, true, numSites);
 
         var sm = new SurfaceMesh();
         sm.mesh = new Mesh();
@@ -48,6 +48,7 @@ public class VoronoiDemo : MonoBehaviour
         {
             RelaxSites(1);
         }
+        if(animate) RelaxSites(1);
     }
 
     void Compute(List<Point> sites)
