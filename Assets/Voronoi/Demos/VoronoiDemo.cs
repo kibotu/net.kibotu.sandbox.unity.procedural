@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Linq;
-using System.Collections;
 using System.Collections.Generic;
 
 using Voronoi;
@@ -22,20 +21,6 @@ public class VoronoiDemo : MonoBehaviour
         voronoi = new FortuneVoronoi();
 
         CreateSites(true, true, numSites);
-
-        var sm = new SurfaceMesh();
-        sm.mesh = new Mesh();
-//        var triangles = Delaunay.Triangulate(sites);
-
-//        for(var i = 0; i < triangles.Length-3; i+=3)
-//        {
-//            sm.mesh.vertices[i] += new Vector3(triangles[i].p1.x, triangles[i].p1.y, 0);
-//            sm.mesh.vertices[i + 1] += new Vector3(triangles[i].p2.x, triangles[i].p1.y, 0);
-//            sm.mesh.vertices[i + 2] += new Vector3(triangles[i].p3.x, triangles[i].p1.y, 0);
-//        }
-
-//        gameObject.AddComponent<MeshFilter>().mesh = sm.mesh;
-//        gameObject.AddComponent<MeshRenderer>();
     }
 
     void Update()
