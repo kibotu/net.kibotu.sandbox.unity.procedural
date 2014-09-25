@@ -2,20 +2,19 @@
 // Red-Black tree code (based on C version of "rbtree" by Franck Bui-Huu
 // https://github.com/fbuihuu/libtree/blob/master/rb.c
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace Voronoi
 {
-    public class RBNodeBase<T> where T : class
+    public class RBNode
     {
-        public T Parent;
-        public T Prev;
-        public T Next;
-        public T Left;
-        public T Right;
+    }
+
+    public class RBNodeBase : RBNode
+    {
+        public RBNodeBase Parent;
+        public RBNodeBase Prev;
+        public RBNodeBase Next;
+        public RBNodeBase Left;
+        public RBNodeBase Right;
         public bool Red;
         public bool Black { get { return !Red; } }
 
@@ -29,24 +28,24 @@ namespace Voronoi
             this.Red = false;
         }
 
-        public static implicit operator bool(RBNodeBase<T> a)
+        public static implicit operator bool(RBNodeBase a)
         {
             return a != null;
         }
     }
 
-    public class RBTree<RBNode> where RBNode : RBNodeBase<RBNode>
+    public class RBTree :  RBNodeBase
     {
-        public RBNode Root;
+        public RBNodeBase Root;
 
         public RBTree()
         {
             this.Root = null;
         }
 
-        public void Insert(RBNode node, RBNode successor)
+        public void Insert(RBNodeBase node, RBNodeBase successor)
         {
-            RBNode parent = null;
+            RBNodeBase parent = null;
             if (node)
             {
                 // >>> rhill 2011-05-27: Performance: cache previous/next nodes
@@ -103,8 +102,8 @@ namespace Voronoi
             // Fixup the modified tree by recoloring nodes and performing
             // rotations (2 at most) hence the red-black tree properties are
             // preserved.
-            RBNode grandpa;
-            RBNode uncle;
+            RBNodeBase grandpa;
+            RBNodeBase uncle;
             node = successor;
             while (parent != null && parent.Red)
             {
@@ -160,7 +159,7 @@ namespace Voronoi
             Root.Red = false;
         }
 
-        public void Remove(RBNode node)
+        public void Remove(RBNodeBase node)
         {
             // >>> rhill 2011-05-27: Performance: cache previous/next nodes
             if (node.Next)
@@ -175,10 +174,10 @@ namespace Voronoi
             node.Prev = null;
             // <<<
 
-            RBNode parent = node.Parent;
-            RBNode left = node.Left;
-            RBNode right = node.Right;
-            RBNode next = (left == null) ? right : (right == null) ? left : GetFirst(right);
+            RBNodeBase parent = node.Parent;
+            RBNodeBase left = node.Left;
+            RBNodeBase right = node.Right;
+            RBNodeBase next = (left == null) ? right : (right == null) ? left : GetFirst(right);
 
             if (parent)
             {
@@ -238,7 +237,7 @@ namespace Voronoi
                 return;
             }
             // the other cases
-            RBNode sibling;
+            RBNodeBase sibling;
             do
             {
                 if (node == Root)
@@ -309,11 +308,11 @@ namespace Voronoi
                 node.Red = false;
         }
 
-        private void RotateLeft(RBNode node)
+        private void RotateLeft(RBNodeBase node)
         {
-            RBNode p = node;
-            RBNode q = node.Right;
-            RBNode parent = p.Parent;
+            RBNodeBase p = node;
+            RBNodeBase q = node.Right;
+            RBNodeBase parent = p.Parent;
             if (parent)
             {
                 if (parent.Left == p)
@@ -335,11 +334,11 @@ namespace Voronoi
             q.Left = p;
         }
 
-        private void RotateRight(RBNode node)
+        private void RotateRight(RBNodeBase node)
         {
-            RBNode p = node;
-            RBNode q = node.Left;
-            RBNode parent = p.Parent;
+            RBNodeBase p = node;
+            RBNodeBase q = node.Left;
+            RBNodeBase parent = p.Parent;
             if (parent)
             {
                 if (parent.Left == p)
@@ -361,21 +360,21 @@ namespace Voronoi
             q.Right = p;
         }
 
-        public RBNode GetFirst(RBNode node)
+        public RBNodeBase GetFirst(RBNodeBase node)
         {
             while (node.Left)
                 node = node.Left;
             return node;
         }
 
-        public RBNode GetLast(RBNode node)
+        public RBNodeBase GetLast(RBNodeBase node)
         {
             while (node.Right)
                 node = node.Right;
             return node;
         }
 
-        public static implicit operator bool(RBTree<RBNode> a)
+        public static implicit operator bool(RBTree a)
         {
             return a != null;
         }

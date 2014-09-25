@@ -19,6 +19,23 @@ public class VoronoiDemo : MonoBehaviour
     {
         sites = new List<Point>();
         voronoi = new FortuneVoronoi();
+
+        CreateSites(true, true, 50);
+//        RelaxSites(50);
+
+        var sm = new SurfaceMesh();
+        sm.mesh = new Mesh();
+//        var triangles = Delaunay.Triangulate(sites);
+
+//        for(var i = 0; i < triangles.Length-3; i+=3)
+//        {
+//            sm.mesh.vertices[i] += new Vector3(triangles[i].p1.x, triangles[i].p1.y, 0);
+//            sm.mesh.vertices[i + 1] += new Vector3(triangles[i].p2.x, triangles[i].p1.y, 0);
+//            sm.mesh.vertices[i + 2] += new Vector3(triangles[i].p3.x, triangles[i].p1.y, 0);
+//        }
+
+//        gameObject.AddComponent<MeshFilter>().mesh = sm.mesh;
+//        gameObject.AddComponent<MeshRenderer>();
     }
 
     void Update()
@@ -75,7 +92,7 @@ public class VoronoiDemo : MonoBehaviour
             List<Point> sites = new List<Point>();
             float dist = 0;
 
-            float p = 1 / graph.cells.Count * 0.1f;
+            float p = 1f / graph.cells.Count * 0.1f;
 
             for (int iCell = graph.cells.Count - 1; iCell >= 0; iCell--)
             {

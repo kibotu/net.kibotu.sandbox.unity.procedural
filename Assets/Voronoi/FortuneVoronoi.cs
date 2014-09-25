@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,8 +16,8 @@ namespace Voronoi
         private List<BeachSection> beachSectionJunkyard;
         private List<CircleEvent> circleEventJunkyard;
 
-        protected RBTree<BeachSection> beachLine;
-        protected RBTree<CircleEvent> circleEvents;
+        protected RBTree beachLine;
+        protected RBTree circleEvents;
 
         private CircleEvent firstCircleEvent;
 
@@ -35,24 +36,24 @@ namespace Voronoi
         {
             if (!this.beachLine)
             {
-                this.beachLine = new RBTree<BeachSection>();
+                this.beachLine = new RBTree();
             }
 
             // Move leftover beachsections to the beachsection junkyard.
             if (this.beachLine.Root)
             {
-                BeachSection beachSection = this.beachLine.GetFirst(this.beachLine.Root);
+                BeachSection beachSection = (BeachSection)this.beachLine.GetFirst(this.beachLine.Root);
                 while (beachSection)
                 {
                     this.beachSectionJunkyard.Add(beachSection);
-                    beachSection = beachSection.Next;
+                    beachSection = (BeachSection)beachSection.Next;
                 }
             }
             this.beachLine.Root = null;
 
             if (!this.circleEvents)
             {
-                this.circleEvents = new RBTree<CircleEvent>();
+                this.circleEvents = new RBTree();
             }
             this.circleEvents.Root = this.firstCircleEvent = null;
 
@@ -90,10 +91,10 @@ namespace Voronoi
                 CircleEvent circle = this.firstCircleEvent;
 
                 // add beach section
-                if (site && (!circle || site.y < circle.y || (site.y == circle.y && site.x < circle.x)))
+                if (site && (!circle || site.y < circle.y || (Math.Abs(site.y - circle.y) < Mathf.Epsilon && site.x < circle.x)))
                 {
                     // only if site is not a duplicate
-                    if (site.x != xsitex || site.y != xsitey)
+                    if (Math.Abs(site.x - xsitex) > Mathf.Epsilon || Math.Abs(site.y - xsitey) > Mathf.Epsilon)
                     {
                         // first create cell for new site
                         //this.cells[siteid] = new Cell(site);
@@ -236,12 +237,12 @@ namespace Voronoi
             float pby2 = rfocy - directrix;
 
             // parabola in degenerate case where focus is on directrix
-            if (pby2 == 0)
+            if (Math.Abs(pby2) < Mathf.Epsilon)
             {
                 return rfocx;
             }
 
-            BeachSection lArc = arc.Prev;
+            BeachSection lArc = (BeachSection)arc.Prev;
             if (!lArc)
             {
                 return -Mathf.Infinity;
@@ -253,7 +254,7 @@ namespace Voronoi
             float plby2 = lfocy - directrix;
 
             // parabola in degenerate case where focus is on directrix
-            if (plby2 == 0)
+            if (Math.Abs(plby2) < Mathf.Epsilon)
             {
                 return lfocx;
             }
@@ -262,7 +263,7 @@ namespace Voronoi
             float aby2 = 1 / pby2 - 1 / plby2;
             float b = hl / plby2;
 
-            if (aby2 != 0)
+            if (Math.Abs(aby2) > Mathf.Epsilon)
             {
                 return (-b + Mathf.Sqrt(b * b - 2 * aby2 * (hl * hl / (-2 * plby2) - lfocy + plby2 / 2 + rfocy - pby2 / 2))) / aby2 + rfocx;
             }
@@ -274,14 +275,14 @@ namespace Voronoi
         // given a particular directrix
         public float RightBreakPoint(BeachSection arc, float directrix)
         {
-            BeachSection rArc = arc.Next;
+            BeachSection rArc = (BeachSection)arc.Next;
             if (rArc)
             {
                 return this.LeftBreakPoint(rArc, directrix);
             }
 
             Point site = arc.site;
-            return site.y == directrix ? site.x : Mathf.Infinity;
+            return Math.Abs(site.y - directrix) < Mathf.Epsilon ? site.x : Mathf.Infinity;
         }
 
         public void DetachBeachSection(BeachSection beachSection)
@@ -298,8 +299,8 @@ namespace Voronoi
             float y = circle.yCenter;
             Point vertex = new Point(x, y);
 
-            BeachSection previous = beachSection.Prev;
-            BeachSection next = beachSection.Next;
+            BeachSection previous = (BeachSection)beachSection.Prev;
+            BeachSection next = (BeachSection)beachSection.Next;
 
             LinkedList<BeachSection> disappearingTransitions = new LinkedList<BeachSection>();
             disappearingTransitions.AddLast(beachSection);
@@ -322,7 +323,7 @@ namespace Voronoi
                    Mathf.Abs(x - lArc.circleEvent.x) < EPSILON &&
                    Mathf.Abs(y - lArc.circleEvent.yCenter) < EPSILON)
             {
-                previous = lArc.Prev;
+                previous = (BeachSection)lArc.Prev;
                 disappearingTransitions.AddFirst(lArc);
                 this.DetachBeachSection(lArc); // mark for reuse
                 lArc = previous;
@@ -340,7 +341,7 @@ namespace Voronoi
                    Mathf.Abs(x - rArc.circleEvent.x) < EPSILON &&
                    Mathf.Abs(y - rArc.circleEvent.yCenter) < EPSILON)
             {
-                next = rArc.Next;
+                next = (BeachSection)rArc.Next;
                 disappearingTransitions.AddLast(rArc);
                 this.DetachBeachSection(rArc);
                 rArc = next;
@@ -385,7 +386,7 @@ namespace Voronoi
             // created beach section.
             // rhill 2011-06-01: This loop is one of the most often executed,
             // hence we expand in-place the comparison-against-epsilon calls.
-            BeachSection node = this.beachLine.Root;
+            BeachSection node = (BeachSection)this.beachLine.Root;
             BeachSection lArc = null;
             BeachSection rArc = null;
             float dxl, dxr;
@@ -408,7 +409,7 @@ namespace Voronoi
                     } else {
                         node = node.Left;
                     }*/
-                    node = node.Left;
+                    node = (BeachSection)node.Left;
                 }
                 else
                 {
@@ -422,21 +423,21 @@ namespace Voronoi
                             break;
                         }
 
-                        node = node.Right;
+                        node = (BeachSection)node.Right;
                     }
                     else
                     {
                         // x EqualWithEpsilon xl => falls exactly on the Left edge of the beachsection
                         if (dxl > -EPSILON)
                         {
-                            lArc = node.Prev;
+                            lArc = (BeachSection)node.Prev;
                             rArc = node;
                         }
                         // x EqualWithEpsilon xr => falls exactly on the Right edge of the beachsection
                         else if (dxr > -EPSILON)
                         {
                             lArc = node;
-                            rArc = node.Next;
+                            rArc = (BeachSection)node.Next;
                         }
                         // falls exactly somewhere in the middle of the beachsection
                         else
@@ -452,9 +453,10 @@ namespace Voronoi
             // at this point, keep in mind that lArc and/or rArc could be
             // undefined or null.
 
+
             // create a new beach section object for the site and add it to RB-tree
             BeachSection newArc = this.CreateBeachSection(site);
-            this.beachLine.Insert(lArc, newArc);
+            this.beachLine.Insert(lArc,newArc);
 
             // cases:
             //
@@ -470,6 +472,7 @@ namespace Voronoi
             {
                 return;
             }
+
 
             // [lArc,rArc] where lArc == rArc
             // most likely case: new beach section split an existing beach
@@ -582,8 +585,8 @@ namespace Voronoi
 
         public void AttachCircleEvent(BeachSection arc)
         {
-            BeachSection lArc = arc.Prev;
-            BeachSection rArc = arc.Next;
+            BeachSection lArc = (BeachSection)arc.Prev;
+            BeachSection rArc = (BeachSection)arc.Next;
 
             if (!lArc || !rArc)
             {
@@ -657,19 +660,19 @@ namespace Voronoi
             // find insertion point in RB-tree: circle events are ordered from
             // smallest to largest
             CircleEvent predecessor = null;
-            CircleEvent node = this.circleEvents.Root;
+            CircleEvent node = (CircleEvent)this.circleEvents.Root;
 
             while (node)
             {
-                if (circleEvent.y < node.y || (circleEvent.y == node.y && circleEvent.x <= node.x))
+                if (circleEvent.y < node.y || (Math.Abs(circleEvent.y - node.y) < Mathf.Epsilon && circleEvent.x <= node.x))
                 {
                     if (node.Left)
                     {
-                        node = node.Left;
+                        node = (CircleEvent)node.Left;
                     }
                     else
                     {
-                        predecessor = node.Prev;
+                        predecessor = (CircleEvent)node.Prev;
                         break;
                     }
                 }
@@ -677,7 +680,7 @@ namespace Voronoi
                 {
                     if (node.Right)
                     {
-                        node = node.Right;
+                        node = (CircleEvent)node.Right;
                     }
                     else
                     {
@@ -702,7 +705,7 @@ namespace Voronoi
             {
                 if (!circle.Prev)
                 {
-                    this.firstCircleEvent = circle.Next;
+                    this.firstCircleEvent = (CircleEvent)circle.Next;
                 }
 
                 this.circleEvents.Remove(circle); // remove from RB-tree
@@ -752,7 +755,7 @@ namespace Voronoi
             this.cells[rSite.id].closeMe = true;
 
             // get the line equation of the bisector if line is not vertical
-            if (ry != ly)
+            if (Math.Abs(ry - ly) > Mathf.Epsilon)
             {
                 fm = (lx - rx) / (ry - ly);
                 fb = fy - fm * fx;
@@ -920,7 +923,7 @@ namespace Voronoi
 
             // left
             float q = ax - bbox.min.x;
-            if (dx == 0 && q < 0) { return false; }
+            if (Math.Abs(dx) < Mathf.Epsilon && q < 0) { return false; }
             float r = -q / dx;
             if (dx < 0)
             {
@@ -934,7 +937,7 @@ namespace Voronoi
             }
             // right
             q = bbox.max.x - ax;
-            if (dx == 0 && q < 0) { return false; }
+            if (Math.Abs(dx) < Mathf.Epsilon && q < 0) { return false; }
             r = q / dx;
             if (dx < 0)
             {
@@ -948,7 +951,7 @@ namespace Voronoi
             }
             // top
             q = ay - bbox.min.z;
-            if (dy == 0 && q < 0) { return false; }
+            if (Math.Abs(dy) < Mathf.Epsilon && q < 0) { return false; }
             r = -q / dy;
             if (dy < 0)
             {
@@ -962,7 +965,7 @@ namespace Voronoi
             }
             // bottom        
             q = bbox.max.z - ay;
-            if (dy == 0 && q < 0) { return false; }
+            if (Math.Abs(dy) < Mathf.Epsilon && q < 0) { return false; }
             r = q / dy;
             if (dy < 0)
             {

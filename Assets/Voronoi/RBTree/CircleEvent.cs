@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace Voronoi
 {
-    public class CircleEvent : RBNodeBase<CircleEvent>
+    public class CircleEvent : RBNodeBase
     {
         public BeachSection arc;
         public Point site;
