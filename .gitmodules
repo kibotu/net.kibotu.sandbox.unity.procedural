@@ -1,0 +1,3 @@
+[submodule "Assets/RogueLike"]
+	path = Assets/RogueLike
+	url = ../RogueLike.git
